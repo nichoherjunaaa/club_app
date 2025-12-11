@@ -41,10 +41,10 @@ fun SplashScreen(
             Image(
                 painter = painterResource(id = R.drawable.ic_app_logo),
                 contentDescription = "Football Club App Logo",
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(150.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(35.dp))
 
             // Judul Aplikasi
             Text(
