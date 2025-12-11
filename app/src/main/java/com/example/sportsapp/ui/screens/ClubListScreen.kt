@@ -18,18 +18,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.sportsapp.ui.viewmodels.ClubViewModel
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.SportsSoccer
-import androidx.compose.material.icons.outlined.Info // <-- TAMBAHKAN INI
+import androidx.compose.material.icons.outlined.Info
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClubListScreen(
     onClubClick: (com.example.sportsapp.data.model.Team) -> Unit,
-    onAboutClick: () -> Unit, // <-- TAMBAHKAN INI
+    onAboutClick: () -> Unit,
     viewModel: ClubViewModel = viewModel()
 ) {
     val clubs by viewModel.clubs.collectAsState()
@@ -77,7 +76,6 @@ fun ClubListScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Search Bar
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
@@ -95,7 +93,6 @@ fun ClubListScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Search Button
                 Button(
                     onClick = { viewModel.searchClubs(searchText) },
                     modifier = Modifier.fillMaxWidth(),
@@ -109,7 +106,6 @@ fun ClubListScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Error Message
                 error?.let { errorMsg ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -176,7 +172,6 @@ fun ClubCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Club Badge
             Box(
                 modifier = Modifier
                     .size(70.dp)

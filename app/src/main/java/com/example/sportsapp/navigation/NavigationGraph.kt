@@ -1,11 +1,6 @@
 package com.example.sportsapp.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,11 +18,9 @@ fun NavigationGraph(navController: NavHostController = rememberNavController()) 
         navController = navController,
         startDestination = Screen.Splash.route // Ubah start destination ke Splash
     ) {
-        // Splash Screen
         composable(Screen.Splash.route) {
             SplashScreen(
                 onSplashEnd = {
-                    // Navigasi ke ClubList setelah splash selesai
                     navController.navigate(Screen.ClubList.route) {
                         popUpTo(Screen.Splash.route) {
                             inclusive = true // Hapus splash dari backstack
@@ -37,7 +30,6 @@ fun NavigationGraph(navController: NavHostController = rememberNavController()) 
             )
         }
 
-        // Club List Screen
         composable(Screen.ClubList.route) {
             ClubListScreen(
                 onClubClick = { club ->
@@ -49,7 +41,6 @@ fun NavigationGraph(navController: NavHostController = rememberNavController()) 
             )
         }
 
-        // Club Detail Screen
         composable(
             route = Screen.ClubDetail.route,
             arguments = listOf(navArgument("clubName") { type = NavType.StringType })

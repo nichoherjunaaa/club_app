@@ -37,7 +37,6 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = 40.dp)
         ) {
-            // Logo Aplikasi
             Image(
                 painter = painterResource(id = R.drawable.ic_app_logo),
                 contentDescription = "Football Club App Logo",
@@ -46,7 +45,6 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Judul Aplikasi
             Text(
                 text = "Football Club Info",
                 style = MaterialTheme.typography.headlineMedium.copy(
@@ -59,7 +57,6 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Deskripsi
             Text(
                 text = "Discover your favorite football clubs, players, and match statistics",
                 style = MaterialTheme.typography.bodyLarge,
@@ -69,14 +66,13 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Tombol Start
             Button(
                 onClick = onSplashEnd,
                 modifier = Modifier
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // Background tombol primary
-                    contentColor = MaterialTheme.colorScheme.onPrimary // Text warna putih
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 shape = MaterialTheme.shapes.medium
             ) {
