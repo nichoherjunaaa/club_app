@@ -12,33 +12,32 @@ import kotlinx.coroutines.launch
 class ClubViewModel : ViewModel() {
     private val repository = ClubRepository()
 
-    // State untuk daftar klub
     private val _clubs = MutableStateFlow<List<Team>>(emptyList())
     val clubs: StateFlow<List<Team>> = _clubs.asStateFlow()
 
-    // State untuk loading
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // State untuk error
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    // State untuk klub yang dipilih
     private val _selectedClub = MutableStateFlow<Team?>(null)
     val selectedClub: StateFlow<Team?> = _selectedClub.asStateFlow()
 
-    // State untuk query pencarian
-    private val _searchQuery = MutableStateFlow("Arsenal")
+    private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     init {
-        loadClubs("Arsenal")
+        loadDefaultTeams()
     }
 
     fun searchClubs(query: String) {
         _searchQuery.value = query
-        loadClubs(query)
+        if (query.isBlank()) {
+            loadDefaultTeams()
+        } else {
+            loadClubs(query)
+        }
     }
 
     private fun loadClubs(query: String) {
@@ -59,6 +58,31 @@ class ClubViewModel : ViewModel() {
 
             _isLoading.value = false
         }
+    }
+
+    fun loadDefaultTeams() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            _searchQuery.value = ""
+
+            val result = repository.getDefaultTeams()
+            result.onSuccess { response ->
+                _clubs.value = response.teams ?: emptyList()
+                if (response.teams.isNullOrEmpty()) {
+                    _error.value = "Tidak ada tim yang ditemukan"
+                }
+            }.onFailure { exception ->
+                _error.value = exception.message ?: "Gagal memuat tim default"
+                _clubs.value = emptyList()
+            }
+
+            _isLoading.value = false
+        }
+    }
+
+    fun resetToDefault() {
+        loadDefaultTeams()
     }
 
     fun selectClub(club: Team) {

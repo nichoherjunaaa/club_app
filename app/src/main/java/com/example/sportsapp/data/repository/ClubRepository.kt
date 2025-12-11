@@ -20,4 +20,19 @@ class ClubRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun getDefaultTeams(): Result<TeamResponse> = withContext(Dispatchers.IO) {
+        try {
+
+             val response = apiService.getAllTeamsByLeague("English_Premier_League")
+
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: TeamResponse())
+            } else {
+                Result.failure(Exception("Failed to load default teams"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

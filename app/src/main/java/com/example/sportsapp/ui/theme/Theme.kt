@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Tema Putih & Hijau
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryGreen,
     secondary = AccentGreen,

@@ -35,20 +35,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.sportsapp.data.repository.ClubRepository
 import com.example.sportsapp.ui.viewmodels.ClubViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,7 +127,6 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            // Club Banner
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -159,7 +153,6 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Club Info Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -182,7 +175,6 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Basic Info
                     InfoRow(
                         icon = Icons.Default.Info,
                         title = "League",
@@ -239,7 +231,6 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
             }
         }
 
-        // Description
         club.strDescriptionEN?.let { description ->
             if (description.isNotEmpty()) {
                 item {

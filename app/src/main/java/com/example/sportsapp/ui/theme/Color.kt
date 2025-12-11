@@ -2,7 +2,6 @@ package com.example.sportsapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Tema Putih & Hijau
 val PrimaryGreen = Color(0xFF2E7D32)
 val DarkGreen = Color(0xFF1B5E20)
 val LightGreen = Color(0xFFE8F5E9)
