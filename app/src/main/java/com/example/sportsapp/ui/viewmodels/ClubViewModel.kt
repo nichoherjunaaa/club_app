@@ -15,17 +15,20 @@ class ClubViewModel : ViewModel() {
     private val _clubs = MutableStateFlow<List<Team>>(emptyList())
     val clubs: StateFlow<List<Team>> = _clubs.asStateFlow()
 
+    private val _clubDetail = MutableStateFlow<Team?>(null)
+    val clubDetail: StateFlow<Team?> = _clubDetail.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    private val _selectedClub = MutableStateFlow<Team?>(null)
-    val selectedClub: StateFlow<Team?> = _selectedClub.asStateFlow()
-
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    // Cache untuk default teams
+    private var defaultTeamsCache: List<Team> = emptyList()
 
     init {
         loadDefaultTeams()
@@ -34,7 +37,11 @@ class ClubViewModel : ViewModel() {
     fun searchClubs(query: String) {
         _searchQuery.value = query
         if (query.isBlank()) {
-            loadDefaultTeams()
+            if (defaultTeamsCache.isNotEmpty()) {
+                _clubs.value = defaultTeamsCache
+            } else {
+                loadDefaultTeams()
+            }
         } else {
             loadClubs(query)
         }
@@ -68,28 +75,68 @@ class ClubViewModel : ViewModel() {
 
             val result = repository.getDefaultTeams()
             result.onSuccess { response ->
-                _clubs.value = response.teams ?: emptyList()
-                if (response.teams.isNullOrEmpty()) {
+                val teams = response.teams ?: emptyList()
+                _clubs.value = teams
+                defaultTeamsCache = teams // Simpan ke cache
+
+                if (teams.isEmpty()) {
                     _error.value = "Tidak ada tim yang ditemukan"
                 }
             }.onFailure { exception ->
                 _error.value = exception.message ?: "Gagal memuat tim default"
                 _clubs.value = emptyList()
+                defaultTeamsCache = emptyList()
             }
 
             _isLoading.value = false
         }
     }
 
-    fun resetToDefault() {
-        loadDefaultTeams()
+    fun loadClubDetail(clubName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            _clubDetail.value = null
+
+            // Search klub spesifik
+            val result = repository.searchClub(clubName)
+            result.onSuccess { response ->
+                // Cari klub yang tepat sesuai nama
+                val club = response.teams?.find {
+                    it.strTeam?.equals(clubName, ignoreCase = true) == true
+                }
+                _clubDetail.value = club
+
+                if (club == null) {
+                    _error.value = "Klub '$clubName' tidak ditemukan"
+                }
+            }.onFailure { exception ->
+                _error.value = exception.message ?: "Gagal memuat detail klub"
+                _clubDetail.value = null
+            }
+
+            _isLoading.value = false
+        }
     }
 
-    fun selectClub(club: Team) {
-        _selectedClub.value = club
+    fun clearClubDetail() {
+        _clubDetail.value = null
     }
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun clearClubs() {
+        _clubs.value = emptyList()
+    }
+
+    fun resetToDefault() {
+        if (defaultTeamsCache.isNotEmpty()) {
+            _clubs.value = defaultTeamsCache
+            _searchQuery.value = ""
+        } else {
+            loadDefaultTeams()
+        }
     }
 }

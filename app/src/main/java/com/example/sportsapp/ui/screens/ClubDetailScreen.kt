@@ -32,19 +32,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.sportsapp.ui.viewmodels.ClubViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClubDetailScreen(
@@ -52,16 +54,20 @@ fun ClubDetailScreen(
     onBackClick: () -> Unit,
     viewModel: ClubViewModel = viewModel()
 ) {
-    val clubs by viewModel.clubs.collectAsState()
+    val clubDetail by viewModel.clubDetail.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-
-    val club = remember(clubName, clubs) {
-        clubs.find { it.strTeam == clubName } ?: clubs.firstOrNull()
-    }
+    val error by viewModel.error.collectAsState()
 
     LaunchedEffect(clubName) {
-        if (club == null) {
-            viewModel.searchClubs(clubName)
+        // Load detail klub secara spesifik
+        viewModel.loadClubDetail(clubName)
+    }
+
+    // Clear data ketika keluar dari screen
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.clearClubDetail()
+            viewModel.clearError()
         }
     }
 
@@ -70,7 +76,7 @@ fun ClubDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = club?.strTeam ?: "Club Details",
+                        text = clubDetail?.strTeam ?: clubName,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 },
@@ -96,24 +102,83 @@ fun ClubDetailScreen(
                 .background(MaterialTheme.colorScheme.background),
             color = MaterialTheme.colorScheme.background
         ) {
-            if (isLoading && club == null) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
                 }
-            } else if (club != null) {
-                ClubDetailContent(club = club)
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Klub tidak ditemukan",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+
+                error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Error",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.error,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = error!!,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            androidx.compose.material3.Button(
+                                onClick = {
+                                    viewModel.clearError()
+                                    onBackClick()
+                                }
+                            ) {
+                                Text("Kembali")
+                            }
+                        }
+                    }
+                }
+
+                clubDetail != null -> {
+                    ClubDetailContent(club = clubDetail!!)
+                }
+
+                else -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Klub tidak ditemukan",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Klub '$clubName' tidak ditemukan dalam database.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            androidx.compose.material3.Button(
+                                onClick = onBackClick
+                            ) {
+                                Text("Kembali ke Daftar Klub")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -127,6 +192,7 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
+            // Banner/Logo Section
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,11 +214,20 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
                         modifier = Modifier.size(150.dp),
                         contentScale = ContentScale.Fit
                     )
+                } else {
+                    // Fallback jika tidak ada gambar
+                    Text(
+                        text = club.strTeam ?: "Club",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onTertiary,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Basic Info Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,22 +248,25 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
+                    // League Info
                     InfoRow(
                         icon = Icons.Default.Info,
                         title = "League",
                         value = club.strLeague ?: "Unknown"
                     )
 
+                    // Country Info
                     InfoRow(
                         icon = Icons.Default.LocationOn,
                         title = "Country",
                         value = club.strCountry ?: "Unknown"
                     )
 
+                    // Founded Year
                     club.intFormedYear?.let { year ->
-                        if (year.isNotEmpty()) {
+                        if (year.isNotEmpty() && year != "0") {
                             InfoRow(
                                 icon = Icons.Default.Info,
                                 title = "Founded",
@@ -197,6 +275,7 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
                         }
                     }
 
+                    // Stadium Info
                     club.strStadium?.let { stadium ->
                         if (stadium.isNotEmpty()) {
                             InfoRow(
@@ -206,18 +285,19 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
                             )
 
                             club.intStadiumCapacity?.let { capacity ->
-                                if (capacity.isNotEmpty()) {
+                                if (capacity.isNotEmpty() && capacity != "0") {
                                     Text(
                                         text = "Capacity: $capacity",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(start = 40.dp)
+                                        modifier = Modifier.padding(start = 40.dp, top = 4.dp)
                                     )
                                 }
                             }
                         }
                     }
 
+                    // Website
                     club.strWebsite?.let { website ->
                         if (website.isNotEmpty()) {
                             InfoRow(
@@ -227,12 +307,24 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
                             )
                         }
                     }
+
+                    // Sport Type
+                    club.strSport?.let { sport ->
+                        if (sport.isNotEmpty()) {
+                            InfoRow(
+                                icon = Icons.Default.Info,
+                                title = "Sport",
+                                value = sport
+                            )
+                        }
+                    }
                 }
             }
         }
 
+        // Description Section
         club.strDescriptionEN?.let { description ->
-            if (description.isNotEmpty()) {
+            if (description.isNotEmpty() && description.length > 10) {
                 item {
                     Card(
                         modifier = Modifier
@@ -260,7 +352,8 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
                                 text = description,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Justify
+                                textAlign = TextAlign.Justify,
+                                lineHeight = 20.sp
                             )
                         }
                     }
@@ -271,11 +364,15 @@ fun ClubDetailContent(club: com.example.sportsapp.data.model.Team) {
 }
 
 @Composable
-fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, value: String) {
+fun InfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    value: String
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -285,9 +382,11 @@ fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String
             modifier = Modifier.size(24.dp)
         )
 
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(modifier = Modifier.size(12.dp))
 
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodySmall,
@@ -296,7 +395,8 @@ fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium
             )
         }
     }
