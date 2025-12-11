@@ -1,11 +1,29 @@
-Tema : Sports
-Nama Aplikasi : FCInfo - Football Club Info
-Deskripsi Singat Aplikasi : Aplikasi android yang dapat menampilkan informasi mengenai suatu club yang ada di dunia seperti informasi Liga, negara, nama stadion dan lain lagi. 
+# ⚽ FCInfo – Football Club Info
 
-Dosen Pengampu:
-Eduardus Hardika Sandy Atmaja, Ph.D.
+FCInfo adalah aplikasi Android yang menyediakan informasi klub sepak bola dari berbagai liga di dunia. Pengguna dapat melihat detail seperti negara, liga, stadion, serta informasi dasar lainnya. Aplikasi ini dirancang dengan antarmuka yang sederhana dan informatif, sehingga mudah digunakan untuk kebutuhan akademik maupun pemahaman data sepak bola.
 
-Nama Anggota Kelompok :
-1) Alfeus Galih Cahyono P   / 235314122
-2) Nicho Herjuna    / 235314122
-3) Benrycho Willyam R. Nenobais / 235314159
+---
+
+## 🚀 Fitur Utama
+- **Katalog Klub Sepak Bola** – Menampilkan berbagai klub dari liga internasional.  
+- **Detail Klub** – Informasi negara, liga, dan stadion setiap klub.  
+- **Pencarian Klub** – Memudahkan pengguna menemukan klub tertentu.  
+- **Desain Sederhana & Jelas** – Fokus pada informasi tanpa elemen yang mengganggu.  
+
+---
+
+## 👥 Anggota Kelompok
+| Nama | NIM |
+|------|------|
+| Alfeus Galih Cahyono P | 235314122 |
+| Nicho Herjuna | 235314122 |
+| Benrycho Willyam R. Nenobais | 235314159 |
+
+---
+
+## 👨‍🏫 Dosen Pengampu
+**Eduardus Hardika Sandy Atmaja, Ph.D.**
+
+Project ini dikembangkan sebagai bagian dari UAS mata kuliah Pemograman Perangkat Bergerak.
+
+---
